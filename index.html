@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BarberFlow — Sua barbearia no piloto automático</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --cream: #f5f0e8;
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --dark: #141414;
+    --mid: #222222;
+    --text-muted: #888;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--black); color: var(--cream); font-family: 'DM Sans', sans-serif; font-weight: 300; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 9999; opacity: 0.4; }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 3rem; background: linear-gradient(to bottom, rgba(10,10,10,0.95), transparent); }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.1em; color: var(--gold); }
+  .logo span { color: var(--cream); }
+  nav a { color: var(--cream); text-decoration: none; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; transition: opacity 0.2s; }
+  nav a:hover { opacity: 1; }
+  .hero { min-height: 100vh; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 3rem; padding: 9rem 3rem 5rem; position: relative; overflow: hidden; }
+  .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 50% at 80% 50%, rgba(201,168,76,0.07) 0%, transparent 70%), radial-gradient(ellipse 40% 60% at 10% 80%, rgba(201,168,76,0.04) 0%, transparent 60%); pointer-events: none; }
+  .hero-content { position: relative; z-index: 1; }
+  .hero-tag { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold); border: 1px solid rgba(201,168,76,0.3); padding: 0.4rem 1rem; border-radius: 2px; margin-bottom: 2.5rem; animation: fadeUp 0.8s ease both; }
+  .hero-tag::before { content: ''; width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.8); } }
+  h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3.5rem, 7vw, 8rem); line-height: 0.93; letter-spacing: 0.02em; animation: fadeUp 0.8s 0.1s ease both; }
+  h1 em { font-style: normal; color: var(--gold); position: relative; display: inline-block; }
+  h1 em::after { content: ''; position: absolute; bottom: 4px; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), transparent); }
+  .hero-sub { margin-top: 2.5rem; font-size: clamp(0.9rem, 1.3vw, 1.1rem); max-width: 480px; line-height: 1.75; color: rgba(245,240,232,0.6); animation: fadeUp 0.8s 0.2s ease both; }
+  .hero-sub strong { color: var(--cream); font-weight: 500; }
+  .cta-group { display: flex; align-items: center; gap: 1.5rem; margin-top: 3rem; flex-wrap: wrap; animation: fadeUp 0.8s 0.3s ease both; }
+  .btn-primary { background: var(--gold); color: var(--black); font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 0.9rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 1rem 2.5rem; border: none; cursor: pointer; text-decoration: none; display: inline-block; transition: background 0.2s, transform 0.15s; clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 0 100%); }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+  .btn-ghost { color: var(--cream); font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; opacity: 0.55; transition: opacity 0.2s; }
+  .btn-ghost:hover { opacity: 1; }
+  .btn-ghost::after { content: '→'; }
+  .hero-stat { position: relative; z-index: 1; text-align: right; animation: fadeUp 0.8s 0.5s ease both; flex-shrink: 0; }
+  .hero-stat .num { font-family: 'Bebas Neue', sans-serif; font-size: clamp(4rem, 5.5vw, 6rem); color: var(--gold); line-height: 1; opacity: 0.2; }
+  .hero-stat .label { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); line-height: 1.6; max-width: 160px; margin-left: auto; opacity: 0.6; }
+  .divider { display: flex; align-items: center; gap: 1rem; padding: 0.5rem 3rem; }
+  .divider-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(201,168,76,0.25), transparent); flex: 1; }
+  .divider-icon { color: var(--gold); opacity: 0.35; font-size: 1rem; }
+  .section { padding: 6rem 3rem; max-width: 1200px; margin: 0 auto; }
+  .section-label { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 1rem; opacity: 0.8; }
+  .section-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1; letter-spacing: 0.03em; margin-bottom: 1.5rem; }
+  .pain-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1px; background: rgba(255,255,255,0.05); margin-top: 4rem; border: 1px solid rgba(255,255,255,0.05); }
+  .pain-card { background: var(--dark); padding: 2.5rem; position: relative; overflow: hidden; transition: background 0.3s; }
+  .pain-card:hover { background: var(--mid); }
+  .pain-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 0; background: var(--gold); transition: height 0.3s; }
+  .pain-card:hover::before { height: 100%; }
+  .pain-emoji { font-size: 2rem; margin-bottom: 1.2rem; display: block; }
+  .pain-card h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+  .pain-card p { font-size: 0.88rem; line-height: 1.65; color: rgba(245,240,232,0.52); }
+  .solution-wrap { background: var(--dark); border: 1px solid rgba(201,168,76,0.12); position: relative; overflow: hidden; }
+  .solution-wrap::after { content: ''; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%); pointer-events: none; }
+  .solution-inner { padding: 5rem 3rem; max-width: 1200px; margin: 0 auto; }
+  .solution-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; margin-top: 3rem; }
+  .feature-list { list-style: none; display: flex; flex-direction: column; gap: 1.5rem; }
+  .feature-list li { display: flex; gap: 1rem; align-items: flex-start; }
+  .feature-icon { width: 36px; height: 36px; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem; margin-top: 2px; }
+  .feature-text h4 { font-weight: 500; font-size: 0.95rem; margin-bottom: 0.3rem; }
+  .feature-text p { font-size: 0.85rem; color: rgba(245,240,232,0.5); line-height: 1.6; }
+  .mockup { background: var(--black); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.5); }
+  .mockup-bar { background: var(--mid); padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .mockup-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .mockup-bar-title { flex: 1; text-align: center; font-size: 0.7rem; color: #555; letter-spacing: 0.05em; }
+  .mockup-content { padding: 1.5rem; }
+  .mock-header { font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.08em; color: var(--gold); margin-bottom: 1rem; }
+  .mock-card { background: var(--mid); border: 1px solid rgba(255,255,255,0.06); padding: 0.9rem 1rem; margin-bottom: 0.6rem; display: flex; justify-content: space-between; align-items: center; border-radius: 2px; }
+  .mock-name { font-size: 0.82rem; font-weight: 500; }
+  .mock-time { font-size: 0.73rem; color: var(--text-muted); margin-top: 0.2rem; }
+  .mock-badge { font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.25rem 0.6rem; border-radius: 2px; white-space: nowrap; }
+  .badge-green { background: rgba(76,201,130,0.15); color: #4cc982; }
+  .badge-gold  { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .badge-gray  { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+  .mock-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-top: 1rem; }
+  .mock-stat { background: var(--mid); border: 1px solid rgba(255,255,255,0.06); padding: 0.75rem; text-align: center; border-radius: 2px; }
+  .mock-stat .val { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--gold); letter-spacing: 0.05em; }
+  .mock-stat .lbl { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.2rem; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 4rem; position: relative; }
+  .steps::before { content: ''; position: absolute; top: 1rem; left: 2rem; right: 2rem; height: 1px; background: linear-gradient(90deg, transparent, rgba(201,168,76,0.25), transparent); pointer-events: none; }
+  .step { padding: 3rem 2rem 2rem; position: relative; }
+  .step-dot { width: 12px; height: 12px; background: var(--gold); border-radius: 50%; position: absolute; top: 0.55rem; left: 2rem; box-shadow: 0 0 12px rgba(201,168,76,0.5); }
+  .step-num { font-family: 'Bebas Neue', sans-serif; font-size: 0.75rem; letter-spacing: 0.15em; color: var(--gold); opacity: 0.6; margin-bottom: 1rem; }
+  .step h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.05em; margin-bottom: 0.75rem; }
+  .step p { font-size: 0.87rem; color: rgba(245,240,232,0.52); line-height: 1.65; }
+  .cta-section { background: var(--dark); border-top: 1px solid rgba(201,168,76,0.1); border-bottom: 1px solid rgba(201,168,76,0.1); padding: 8rem 3rem; text-align: center; position: relative; overflow: hidden; }
+  .cta-section::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(201,168,76,0.05) 0%, transparent 70%); pointer-events: none; }
+  .cta-section h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 7vw, 6rem); line-height: 1; letter-spacing: 0.03em; max-width: 700px; margin: 0 auto 1.5rem; position: relative; }
+  .cta-section > p { font-size: 1rem; color: rgba(245,240,232,0.52); max-width: 420px; margin: 0 auto 3rem; line-height: 1.75; position: relative; }
+  .form-row { display: flex; max-width: 480px; margin: 0 auto; position: relative; }
+  .form-row input { flex: 1; min-width: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-right: none; color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; padding: 1rem 1.5rem; outline: none; transition: border-color 0.2s; }
+  .form-row input::placeholder { color: rgba(245,240,232,0.3); }
+  .form-row input:focus { border-color: rgba(201,168,76,0.5); }
+  .form-row button { background: var(--gold); color: var(--black); font-family: 'DM Sans', sans-serif; font-weight: 500; font-size: 0.85rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 1rem 1.8rem; border: none; cursor: pointer; transition: background 0.2s; white-space: nowrap; flex-shrink: 0; }
+  .form-row button:hover { background: var(--gold-light); }
+  .form-note { font-size: 0.75rem; color: rgba(245,240,232,0.3); margin-top: 1rem; position: relative; }
+  footer { padding: 2rem 3rem; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; gap: 1rem; }
+  footer p { font-size: 0.8rem; color: var(--text-muted); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  @media (max-width: 768px) {
+    nav { padding: 1.2rem 1.5rem; }
+    .hero { grid-template-columns: 1fr; padding: 7rem 1.5rem 4rem; gap: 0; }
+    .hero-stat { display: none; }
+    .section { padding: 4rem 1.5rem; }
+    .solution-inner { padding: 3rem 1.5rem; }
+    .solution-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .cta-section { padding: 5rem 1.5rem; }
+    footer { padding: 1.5rem; }
+    .steps::before { display: none; }
+    .form-row { flex-direction: column; }
+    .form-row input { border-right: 1px solid rgba(255,255,255,0.1); border-bottom: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Barber<span>Flow</span></div>
+  <a href="#testar">Quero testar</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Sistema para barbearias</div>
+    <h1>Sua barbearia<br>no <em>piloto</em><br>automático</h1>
+    <p class="hero-sub">
+      Chega de cliente que some. Chega de WhatsApp caótico.<br>
+      <strong>BarberFlow</strong> agenda, confirma e lembra — enquanto você só corta.
+    </p>
+    <div class="cta-group">
+      <a href="#testar" class="btn-primary">Quero testar grátis</a>
+      <a href="#como-funciona" class="btn-ghost">Ver como funciona</a>
+    </div>
+  </div>
+  <div class="hero-stat">
+    <div class="num">73%</div>
+    <div class="label">das faltas são evitadas com confirmação automática</div>
+  </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+
+<section class="section">
+  <p class="section-label reveal">O problema</p>
+  <h2 class="section-title reveal">Quanto você perde<br>por mês com isso?</h2>
+  <div class="pain-grid">
+    <div class="pain-card reveal"><span class="pain-emoji">📵</span><h3>Cliente marca e some</h3><p>Horário vazio, tempo perdido, dinheiro que não entra. E você ainda fica esperando sem saber o que aconteceu.</p></div>
+    <div class="pain-card reveal"><span class="pain-emoji">💬</span><h3>WhatsApp virou um caos</h3><p>Confirmações, remarcações e dúvidas tudo misturado. Difícil saber o que é horário e o que é conversa.</p></div>
+    <div class="pain-card reveal"><span class="pain-emoji">📋</span><h3>Agenda desorganizada</h3><p>Papel, caderno ou cabeça. Você não sabe quantos clientes vêm amanhã sem olhar em cinco lugares diferentes.</p></div>
+    <div class="pain-card reveal"><span class="pain-emoji">🔁</span><h3>Cliente some e não volta</h3><p>Ninguém lembra de chamar quem não aparece faz 30 dias. Ele foi pra concorrência e você nem sabe.</p></div>
+  </div>
+</section>
+
+<div class="solution-wrap">
+  <div class="solution-inner">
+    <p class="section-label reveal">A solução</p>
+    <h2 class="section-title reveal">Um funcionário<br>que nunca dorme</h2>
+    <div class="solution-grid">
+      <ul class="feature-list">
+        <li class="reveal"><div class="feature-icon">📅</div><div class="feature-text"><h4>Agendamento online 24h</h4><p>Seu cliente agenda direto pelo celular, a qualquer hora, sem precisar te chamar no WhatsApp.</p></div></li>
+        <li class="reveal"><div class="feature-icon">✅</div><div class="feature-text"><h4>Confirmação automática</h4><p>O sistema manda mensagem pedindo confirmação. Cliente não responde? Já avisa você.</p></div></li>
+        <li class="reveal"><div class="feature-icon">⏰</div><div class="feature-text"><h4>Lembrete no dia</h4><p>Na manhã do atendimento, o cliente recebe um lembrete automático. As faltas caem até 70%.</p></div></li>
+        <li class="reveal"><div class="feature-icon">📊</div><div class="feature-text"><h4>Painel simples e visual</h4><p>Todos os horários do dia numa tela só. Sem papel, sem caderno, sem dor de cabeça.</p></div></li>
+        <li class="reveal"><div class="feature-icon">🔔</div><div class="feature-text"><h4>Reativação de clientes</h4><p>Cliente sumiu faz 3 semanas? O sistema manda uma mensagem automática chamando ele de volta.</p></div></li>
+      </ul>
+      <div class="mockup reveal">
+        <div class="mockup-bar">
+          <div class="mockup-dot" style="background:#ff5f57"></div>
+          <div class="mockup-dot" style="background:#febc2e"></div>
+          <div class="mockup-dot" style="background:#28c840"></div>
+          <div class="mockup-bar-title">BarberFlow — Painel</div>
+        </div>
+        <div class="mockup-content">
+          <div class="mock-header">📅 Hoje — Quinta, 03 Abr</div>
+          <div class="mock-card"><div><div class="mock-name">Lucas Ferreira</div><div class="mock-time">09:00 · Degradê + Barba</div></div><span class="mock-badge badge-green">Confirmado</span></div>
+          <div class="mock-card"><div><div class="mock-name">Rafael Costa</div><div class="mock-time">10:00 · Corte Social</div></div><span class="mock-badge badge-gold">Aguardando</span></div>
+          <div class="mock-card"><div><div class="mock-name">Matheus Souza</div><div class="mock-time">11:30 · Degradê</div></div><span class="mock-badge badge-green">Confirmado</span></div>
+          <div class="mock-card"><div><div class="mock-name">Pedro Alves</div><div class="mock-time">14:00 · Barba</div></div><span class="mock-badge badge-gray">Pendente</span></div>
+          <div class="mock-stat-row">
+            <div class="mock-stat"><div class="val">8</div><div class="lbl">Hoje</div></div>
+            <div class="mock-stat"><div class="val">R$0</div><div class="lbl">Faltas</div></div>
+            <div class="mock-stat"><div class="val">94%</div><div class="lbl">Taxa</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="section" id="como-funciona">
+  <p class="section-label reveal">Como funciona</p>
+  <h2 class="section-title reveal">Simples assim</h2>
+  <div class="steps">
+    <div class="step reveal"><div class="step-dot"></div><div class="step-num">01</div><h3>Você cadastra sua barbearia</h3><p>Em menos de 5 minutos. Coloca seus serviços e horários disponíveis. Sem precisar de suporte técnico.</p></div>
+    <div class="step reveal"><div class="step-dot"></div><div class="step-num">02</div><h3>Cliente acessa o link e agenda</h3><p>Você compartilha um link único no Instagram ou WhatsApp. O cliente escolhe o horário sozinho.</p></div>
+    <div class="step reveal"><div class="step-dot"></div><div class="step-num">03</div><h3>Sistema confirma automaticamente</h3><p>Confirmação vai na hora. Lembrete vai no dia do atendimento. Você não precisa fazer nada.</p></div>
+    <div class="step reveal"><div class="step-dot"></div><div class="step-num">04</div><h3>Você só corta o cabelo</h3><p>Abre o painel, vê quem vem hoje e foca no que você faz de melhor. O resto é com o sistema.</p></div>
+  </div>
+</section>
+
+<section class="cta-section" id="testar">
+  <h2>Pronto pra<br>testar de graça?</h2>
+  <p>Estamos em fase de lançamento. Deixa seu WhatsApp e seja um dos primeiros a testar.</p>
+  <div class="form-row">
+    <input type="text" id="whatsapp-input" placeholder="Seu WhatsApp (ex: 19 99999-9999)" />
+    <button onclick="handleSubmit(this)">Quero testar</button>
+  </div>
+  <p class="form-note">Sem cartão de crédito. Sem compromisso. 100% grátis na fase beta.</p>
+</section>
+
+<footer>
+  <div class="logo" style="font-size:1.2rem">Barber<span>Flow</span></div>
+  <p>Feito para barbeiros que levam o negócio a sério.</p>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 60);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Formspree submit
+  async function handleSubmit(btn) {
+    const input = document.getElementById('whatsapp-input');
+    const val = input.value.trim();
+    if (!val) { input.focus(); return; }
+
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+
+    try {
+      const response = await fetch('https://formspree.io/f/mkopqkor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ whatsapp: val, _subject: 'Novo interesse no BarberFlow!' })
+      });
+
+      if (response.ok) {
+        btn.textContent = '✓ Recebido!';
+        btn.style.background = '#4cc982';
+        btn.style.color = '#fff';
+        input.value = '';
+        input.placeholder = 'Obrigado! Vamos te contatar em breve.';
+        setTimeout(() => {
+          btn.textContent = 'Quero testar';
+          btn.style.background = '';
+          btn.style.color = '';
+          btn.disabled = false;
+          input.placeholder = 'Seu WhatsApp (ex: 19 99999-9999)';
+        }, 5000);
+      } else {
+        throw new Error('Erro no envio');
+      }
+    } catch (e) {
+      btn.textContent = 'Tente novamente';
+      btn.style.background = '#e05555';
+      btn.style.color = '#fff';
+      btn.disabled = false;
+      setTimeout(() => {
+        btn.textContent = 'Quero testar';
+        btn.style.background = '';
+        btn.style.color = '';
+      }, 3000);
+    }
+  }
+</script>
+</body>
+</html>
